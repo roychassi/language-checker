@@ -1,0 +1,67 @@
+{
+  "id": "language-checker",
+  "name": "Language Checker",
+  "author": "roychassi",
+  "description": "Turns down releases whose real audio has no English, so HolyArrs blocklists them for that episode and searches again.",
+  "long_description": "HolyArrs reads the real audio tracks of a download when it imports it. If the Version asks for English and the tracks don't show it, the file is refused and waits in Needs a decision. This plugin watches for those refusals and turns the release down, so HolyArrs blocklists it for that episode and searches again. It stops after a set number of files per episode and leaves the last one for you. It reads no media, deletes nothing and needs no outside network access. Set Audio languages on the Version first; the plugin only acts on that refusal.",
+  "how_it_works": [
+    "Set Audio languages on a Version, such as English. HolyArrs then checks the real tracks at import.",
+    "A file without that language is refused and waits in Needs a decision.",
+    "The plugin turns that release down for the episode and HolyArrs searches again.",
+    "After Max tries files on one episode, it stops and tells you. Search again by hand, or raise Max tries.",
+    "It starts in dry run: it only alerts until you switch Dry run off."
+  ],
+  "category": "Library tools",
+  "licence": "MIT",
+  "repo": "https://github.com/roychassi/language-checker",
+  "support_email": "roychassi101@proton.me",
+  "support_url": "https://github.com/roychassi/language-checker/issues",
+  "icon_file": "icon.svg",
+  "access": {
+    "hosts": [],
+    "folders": [],
+    "actions": [
+      "downloads.decisions.read",
+      "downloads.decisions.change",
+      "alerts.webhooks.send"
+    ]
+  },
+  "min_app_version": "1.3.0",
+  "settings": [
+    {
+      "key": "dry_run",
+      "label": "Dry run",
+      "type": "toggle",
+      "default": true,
+      "help": "On: only alert about what would be turned down. Off: turn releases down and search again."
+    },
+    {
+      "key": "max_tries",
+      "label": "Max tries per episode",
+      "type": "number",
+      "default": 3,
+      "help": "Files tried per episode. The last one stays in Needs a decision. Raise this to let it carry on."
+    },
+    {
+      "key": "check_every",
+      "label": "Check every (seconds)",
+      "type": "number",
+      "default": 60,
+      "help": "How often to look at Needs a decision. 30 to 3600."
+    },
+    {
+      "key": "alerts",
+      "label": "Send alerts",
+      "type": "toggle",
+      "default": true,
+      "help": "Send a message through your HolyArrs alerts that take plugin messages."
+    },
+    {
+      "key": "refusal_text",
+      "label": "Refusal text to match",
+      "type": "text",
+      "default": "does not establish every language required",
+      "help": "Part of HolyArrs' own refusal message. Change it only if HolyArrs rewords that message."
+    }
+  ]
+}
