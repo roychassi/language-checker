@@ -87,7 +87,7 @@ func (c *Client) Decisions(ctx context.Context) ([]Decision, error) {
 	return out.Items, nil
 }
 
-// TurnDown turns down the release behind a slot, for that episode only, and
+// TurnDown turns down the release behind a slot, for that movie or episode, and
 // makes HolyArrs search again. HolyArrs does both in this one call.
 func (c *Client) TurnDown(ctx context.Context, slotID int64) error {
 	path := "/api/v1/needs-decision/" + strconv.FormatInt(slotID, 10) + "/decide"

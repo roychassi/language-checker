@@ -26,13 +26,14 @@ const (
 	maxBackoff = 5 * time.Minute
 )
 
-// Engine finds the files HolyArrs turned away for their audio languages and
-// turns their releases down, so HolyArrs searches again.
+// Engine finds the movies and episodes HolyArrs turned away for a missing
+// audio language and turns their releases down, so HolyArrs searches again.
 //
 // It never reads media files and never deletes anything. HolyArrs reads the
-// real audio tracks when a download is imported; when the Version asks for a
+// real audio tracks when a download is imported; when the Version requires a
 // language the tracks don't show, the file is refused before it enters the
-// library and waits in Needs a decision. That is the only case acted on here.
+// library and waits in Needs a decision. That is the only case acted on here,
+// whichever language the Version requires.
 type Engine struct {
 	cfg   Config
 	api   API
@@ -137,7 +138,7 @@ func (e *Engine) handle(ctx context.Context, d Decision) error {
 				ep.Seen = ep.Seen[len(ep.Seen)-maxSeen:]
 			}
 			ep.Updated = now
-			e.say("Dry run: %s for %s has no English audio. It would be turned down.", releaseText(d), name)
+			e.say("Dry run: %s for %s is missing a required audio language. It would be turned down.", releaseText(d), name)
 		}
 		return nil
 	}
@@ -160,7 +161,7 @@ func (e *Engine) handle(ctx context.Context, d Decision) error {
 		if !ep.GaveUp {
 			ep.GaveUp = true
 			ep.Updated = now
-			e.say("%s: %d files tried and none had English audio. The last one is waiting in Needs a decision. Search again there for a fresh round, or raise Max tries to let me carry on with this one.", name, ep.Tries)
+			e.say("%s: %d files tried and none had the required audio language. The last one is waiting in Needs a decision. Search again there for a fresh round, or raise Max tries to let me carry on with this one.", name, ep.Tries)
 		}
 		return nil
 	}
@@ -178,8 +179,13 @@ func (e *Engine) handle(ctx context.Context, d Decision) error {
 	}
 	ep.Down = rel
 	ep.Updated = now
-	e.logf("turned down %s for %s: no English audio (file %d of %d)", releaseText(d), name, ep.Tries, e.cfg.MaxTries)
-	e.say("Turned down %s for %s: no English audio in the file. Searching again (file %d of %d).", releaseText(d), name, ep.Tries, e.cfg.MaxTries)
+	// Write it down now, not at the end of the check: if the plugin is stopped
+	// before then, it must not turn the same release down a second time.
+	if err := e.store.Save(now); err != nil {
+		e.logf("could not save state: %v", err)
+	}
+	e.logf("turned down %s for %s: required audio language missing (file %d of %d)", releaseText(d), name, ep.Tries, e.cfg.MaxTries)
+	e.say("Turned down %s for %s: the required audio language is missing from the file. Searching again (file %d of %d).", releaseText(d), name, ep.Tries, e.cfg.MaxTries)
 	return nil
 }
 

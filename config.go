@@ -32,7 +32,7 @@ type Config struct {
 	DataDir  string        // the plugin's own folder
 	DryRun   bool          // only alert, never turn anything down
 	Every    time.Duration // time between checks
-	MaxTries int           // releases to turn down per episode before leaving it to the owner
+	MaxTries int           // files to try per movie or episode before leaving it to the owner
 	Needle   string        // lower case text that marks an audio-language refusal
 	Alerts   bool          // send a message through the owner's alerts
 }

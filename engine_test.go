@@ -120,6 +120,9 @@ func TestDryRunReportsOnceAndChangesNothing(t *testing.T) {
 	if len(api.notes) != 1 || !strings.Contains(api.notes[0], "Dry run") || !strings.Contains(api.notes[0], "Black Butler S01E20") {
 		t.Fatalf("notes = %q, want one dry run message naming the episode", api.notes)
 	}
+	if strings.Contains(strings.ToLower(api.notes[0]), "english") {
+		t.Fatalf("message = %q, the plugin works for any required language", api.notes[0])
+	}
 	if got := e.store.Episodes[1].Tries; got != 0 {
 		t.Fatalf("dry run counted %d tries, want 0", got)
 	}
@@ -134,6 +137,10 @@ func TestTurnsDownAndCounts(t *testing.T) {
 	}
 	if len(api.notes) != 1 || !strings.Contains(api.notes[0], "file 1 of 3") {
 		t.Fatalf("notes = %q, want a message saying file 1 of 3", api.notes)
+	}
+	// The refusal fires for any language a Version requires, so the text must not name one.
+	if !strings.Contains(api.notes[0], "required audio language") || strings.Contains(strings.ToLower(api.notes[0]), "english") {
+		t.Fatalf("message = %q, want it to speak of the required audio language, not English", api.notes[0])
 	}
 }
 
@@ -163,7 +170,7 @@ func TestLeavesTheLastFileAtTheLimitAndSaysSoOnce(t *testing.T) {
 		t.Fatalf("downs = %v, want %v (the third file stays)", api.downs, want)
 	}
 	last := api.notes[len(api.notes)-1]
-	if !strings.Contains(last, "3 files tried") || !strings.Contains(last, "Needs a decision") {
+	if !strings.Contains(last, "3 files tried") || !strings.Contains(last, "Needs a decision") || strings.Contains(strings.ToLower(last), "english") {
 		t.Fatalf("last message = %q, want the limit message", last)
 	}
 	before := len(api.notes)
@@ -427,5 +434,32 @@ func TestRunKeepsGoingAfterFailuresAndStopsWhenAsked(t *testing.T) {
 	}
 	if len(api.downs) != 1 {
 		t.Fatalf("downs = %v, want the refusal handled once after the failures", api.downs)
+	}
+}
+
+// crashAPI "dies" during the call for slot 2, as a plugin killed in the middle of a check would.
+type crashAPI struct{ fakeAPI }
+
+func (c *crashAPI) TurnDown(ctx context.Context, slot int64) error {
+	if slot == 2 {
+		panic("killed")
+	}
+	return c.fakeAPI.TurnDown(ctx, slot)
+}
+
+func TestAFinishedTurnDownIsOnDiskBeforeTheNextCallStarts(t *testing.T) {
+	api := &crashAPI{fakeAPI{items: []Decision{episode(1, 10, audioRefusal), episode(2, 20, audioRefusal)}}}
+	e := newTestEngine(t, &api.fakeAPI, nil)
+	e.api = api
+	func() {
+		defer func() { recover() }()
+		_ = e.Cycle(context.Background())
+	}()
+	store, _, err := OpenStore(e.store.path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := store.Episodes[1]; got == nil || got.Down != 10 || got.Tries != 1 {
+		t.Fatalf("slot 1 on disk = %+v, want the finished turn down recorded before the crash", got)
 	}
 }

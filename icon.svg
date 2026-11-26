@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Language Checker">
   <rect width="128" height="128" rx="28" fill="#1f2937"/>
   <path d="M24 44a12 12 0 0 1 12-12h40a12 12 0 0 1 12 12v22a12 12 0 0 1-12 12H52L38 90V78h-2a12 12 0 0 1-12-12z" fill="#f9fafb"/>
-  <text x="56" y="62" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" text-anchor="middle" fill="#1f2937">EN</text>
+  <path d="M42.5 49.5a3.5 3.5 0 0 1 7 0v11a3.5 3.5 0 0 1-7 0zM56.5 41.5a3.5 3.5 0 0 1 7 0v27a3.5 3.5 0 0 1-7 0zM70.5 46.5a3.5 3.5 0 0 1 7 0v17a3.5 3.5 0 0 1-7 0z" fill="#1f2937"/>
   <circle cx="92" cy="86" r="22" fill="#22c55e"/>
   <path d="M81 86l8 8 15-17" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

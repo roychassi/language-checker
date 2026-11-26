@@ -2,8 +2,8 @@
 // of a download when it imports it, and refuses a file that lacks the audio
 // languages the Version asks for; the file then waits in Needs a decision.
 // This plugin watches for those refusals and turns the refused release down,
-// so HolyArrs blocklists it for that episode and searches again, up to a set
-// number of files per episode.
+// so HolyArrs blocklists it for that movie or episode and searches again, up to
+// a set number of files each.
 //
 // It reads no media, deletes nothing, and needs no outside network access.
 package main
@@ -18,7 +18,7 @@ import (
 	"syscall"
 )
 
-const version = "1.0.0"
+const version = "1.0.1"
 
 func main() {
 	// HolyArrs puts "plugin <id>:" in front of every line and adds the time.
@@ -50,7 +50,7 @@ func run() error {
 	if cfg.DryRun {
 		mode = "dry run, alerts only"
 	}
-	log.Printf("language-checker %s started: %s, checking every %s, up to %d files per episode", version, mode, cfg.Every, cfg.MaxTries)
+	log.Printf("language-checker %s started: %s, checking every %s, up to %d files per movie or episode", version, mode, cfg.Every, cfg.MaxTries)
 
 	// HolyArrs stops a plugin with SIGTERM; finish the current call and leave.
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
